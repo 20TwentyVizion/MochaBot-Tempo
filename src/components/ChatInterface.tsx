@@ -5,7 +5,8 @@ import { Send } from "lucide-react";
 import VoiceControls from "./VoiceControls";
 import ChatHistory from "./ChatHistory";
 import { chatWithGemini } from "@/lib/gemini";
-import { startSpeechRecognition, speak } from "@/lib/speech";
+import { startSpeechRecognition, speak as webSpeak } from "@/lib/speech";
+import { speakWithElevenLabs } from "@/lib/elevenlabs";
 
 interface ChatInterfaceProps {
   onSendMessage?: (message: string) => void;
@@ -27,7 +28,14 @@ const ChatInterface = ({
       text: string;
       timestamp: string;
     }>
-  >([]);
+  >([
+    {
+      id: "1",
+      sender: "bot",
+      text: "Hello! I'm your AI assistant. How can I help you today?",
+      timestamp: new Date().toLocaleTimeString(),
+    },
+  ]);
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(
     null,
   );
@@ -53,6 +61,9 @@ const ChatInterface = ({
       try {
         // Get AI response
         const response = await chatWithGemini(userMessage);
+        if (!response) {
+          throw new Error("No response from Gemini");
+        }
 
         // Add bot message to chat
         setMessages((prev) => [
@@ -65,9 +76,21 @@ const ChatInterface = ({
           },
         ]);
 
-        // Speak the response
+        // Speak the response using selected TTS service
         onBotSpeaking(true);
-        await speak(response);
+        try {
+          if (import.meta.env.VITE_ELEVENLABS_API_KEY) {
+            await speakWithElevenLabs(response);
+          } else {
+            await webSpeak(response);
+          }
+        } catch (error) {
+          console.error("TTS error:", error);
+          // Fallback to web speech if ElevenLabs fails
+          if (error.toString().includes("ElevenLabs")) {
+            await webSpeak(response);
+          }
+        }
         onBotSpeaking(false);
       } catch (error) {
         console.error("Error:", error);
@@ -105,7 +128,7 @@ const ChatInterface = ({
   return (
     <div className="fixed right-6 bottom-6 w-[400px] bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border rounded-lg shadow-lg">
       <div className="flex flex-col h-[600px] p-4 gap-4">
-        <ChatHistory />
+        <ChatHistory messages={messages} />
 
         <div className="space-y-4">
           <form onSubmit={handleSubmit} className="flex gap-2">

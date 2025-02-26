@@ -15,26 +15,7 @@ interface ChatHistoryProps {
   messages?: Message[];
 }
 
-const defaultMessages: Message[] = [
-  {
-    id: "1",
-    sender: "bot",
-    text: "Hello! How can I help you today?",
-    timestamp: "10:00 AM",
-  },
-  {
-    id: "2",
-    sender: "user",
-    text: "I have a question about the service.",
-    timestamp: "10:01 AM",
-  },
-  {
-    id: "3",
-    sender: "bot",
-    text: "Of course! I'd be happy to help. What would you like to know?",
-    timestamp: "10:01 AM",
-  },
-];
+const defaultMessages: Message[] = [];
 
 const ChatHistory: React.FC<ChatHistoryProps> = ({
   messages = defaultMessages,

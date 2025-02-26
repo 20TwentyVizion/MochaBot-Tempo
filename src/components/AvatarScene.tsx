@@ -82,8 +82,9 @@ const AvatarScene = ({
     loader.load(
       modelUrl,
       (gltf) => {
-        // Scale down the model
+        // Scale and position the model
         gltf.scene.scale.set(0.7, 0.7, 0.7);
+        gltf.scene.position.set(0, -2, 0);
         scene.add(gltf.scene);
 
         // Set up animations
@@ -91,20 +92,33 @@ const AvatarScene = ({
           const mixer = new AnimationMixer(gltf.scene);
           mixerRef.current = mixer;
 
-          // Assuming first animation is idle and second is talking
-          const idleAnim = mixer.clipAction(gltf.animations[0]);
-          const talkingAnim = mixer.clipAction(gltf.animations[1]);
+          // Find idle and talking animations by name
+          const idleAnim = mixer.clipAction(
+            gltf.animations.find((anim) =>
+              anim.name.toLowerCase().includes("idle"),
+            ) || gltf.animations[0],
+          );
+          const talkingAnim = mixer.clipAction(
+            gltf.animations.find(
+              (anim) =>
+                anim.name.toLowerCase().includes("talking") ||
+                anim.name.toLowerCase().includes("speak"),
+            ) || gltf.animations[1],
+          );
 
           animationsRef.current = {
             idle: idleAnim,
             talking: talkingAnim,
           };
 
-          // Start idle animation by default
+          // Start idle animation by default with slower speed
           idleAnim.play();
-          idleAnim.setEffectiveTimeScale(1);
+          idleAnim.setEffectiveTimeScale(0.5);
           idleAnim.setEffectiveWeight(1);
           idleAnim.setLoop(THREE.LoopRepeat, Infinity);
+
+          // Set talking animation speed
+          talkingAnim.setEffectiveTimeScale(0.5);
         }
 
         setIsLoading(false);

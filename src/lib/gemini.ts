@@ -1,6 +1,12 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+if (!GEMINI_API_KEY) {
+  console.error(
+    "Missing Gemini API key. Please add VITE_GEMINI_API_KEY to your .env file",
+  );
+}
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 export async function chatWithGemini(message: string) {
   try {
