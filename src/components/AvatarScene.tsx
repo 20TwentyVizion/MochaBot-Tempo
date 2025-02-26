@@ -46,7 +46,7 @@ const AvatarScene = ({
       1000,
     );
     camera.position.set(0, 1.8, 4.2);
-    camera.lookAt(0, 1.5, 0);
+    camera.lookAt(0, 5, 0);
     cameraRef.current = camera;
 
     // Renderer setup
